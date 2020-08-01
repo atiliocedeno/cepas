@@ -1,0 +1,106 @@
+<%= form_with(model: wine, local: true) do |form| %>
+  <% if wine.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(wine.errors.count, "error") %> prohibited this wine from being saved:</h2>
+
+      <ul>
+      <% wine.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <div class="field">
+    <%= form.label :name %>
+    <%= form.text_field :name, :required => true %>
+  </div>
+  <% if @operacion == 'New' %>
+    <% if @cepaList.present? %>
+        <% @cepaList.each do |cepa| %>
+          <div class="field">
+            <%= form.label cepa.name %>
+            <input type="range" min="0" max="100" value="0" name="<%= cepa.name%>" onchange="porcentaje(value, name)">
+            <span id="<%= cepa.name%>"></span>
+          </div>
+        <% end %>
+    <% else %>
+        <p>No existen cepas, ir a crear?</p>
+        <%= link_to 'New_cepa', cepas_path %>
+    <% end %>
+    <% if @enologos.present? %>
+      <div class="field">
+        <%= form.label 'Oenologo' %>
+        <% @enologos.each do |e| %>
+          <li>
+            <%= check_box_tag 'enologos[]', e.name, false, onclick: "mostrarNota('#{e.name}_nota')" -%>
+            <%= h e.name %>
+          </li>
+          <div id="<%=e.name%>_nota" style="display:none">
+            <label>Nota: </label>
+            <input type="range" min="1" max="100" value="0" name="<%= e.name%>" onchange="porcentaje(value, name)">
+            <span id="<%= e.name%>"></span>
+          </div>
+        <% end %>
+      </div>
+      <% else %>
+        <p>No existen Enologos, ir a crear?</p>
+        <%= link_to 'New_oenologo', oenologists_path %>
+    <% end %>
+    <div class="actions">
+        <%= form.submit %>
+      </div>
+  <% end %>
+  <% if @operacion == 'Edit' %>
+      <% @cepaList.order(:cepa_id).each do |cepa| %>
+        <div class="field">
+          <%= form.label cepa.cepa.name %>
+          <input type="range" min="0" max="100" value="<%= cepa.percentage.to_i %>" name="<%= cepa.cepa.name%>" onchange="porcentaje(value, name)">
+          <span id="<%= cepa.cepa.name%>"><%= cepa.percentage.to_i %></span>
+        </div>
+      <% end %>
+      <div class="evaluation">
+          <%= form.label 'Oenologo' %>
+          <% @enologos.order(:age).each do |e| %>
+            <% if Evaluation.find_by(oenologist_id: e.id, wine_id: wine.id).present? %>
+              <li>
+                <%= check_box_tag 'enologos[]', e.name, true, onclick: "mostrarNota('#{e.name}_nota')" -%>
+                <%= h e.name %>
+              </li>
+                <div id="<%=e.name%>_nota" style="display:inline">
+                  <label>Nota: </label>
+                  <input type="range" min="1" max="100" value="<%= Evaluation.find_by(oenologist_id: e.id).rank %>" name="<%= e.name%>"   onchange="porcentaje(value, name)">
+                    <span id="<%= e.name%>"><%= Evaluation.find_by(oenologist_id: e.id).rank %></span>
+                </div>
+            <% else %>
+              <li>
+                <%= check_box_tag 'enologos[]', e.name, false, onclick: "mostrarNota('#{e.name}_nota')" -%>
+                <%= h e.name %>
+              </li>
+              <div id="<%=e.name%>_nota" style="display:none">
+                <label>Nota: </label>
+                <input type="range" min="1" max="100" value="0" name="<%= e.name%>"   onchange="porcentaje(value, name)">
+                  <span id="<%= e.name%>"></span>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      <div class="actions">
+          <%= form.submit %>
+        </div>
+  <% end %>
+<% end %>
+
+<script>
+    function porcentaje(value, name){
+      var output = document.getElementById(name);
+      output.innerHTML = value;
+    }
+    function mostrarNota(name){
+      if (document.getElementById(name).style.display == "inline"){
+        document.getElementById(name).style.display = "none";
+      }
+      else {
+        document.getElementById(name).style.display = "inline";
+      }
+    }
+</script>

@@ -1,0 +1,50 @@
+<%= form_with(model: oenologist, local: true) do |form| %>
+  <% if oenologist.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(oenologist.errors.count, "error") %> prohibited this oenologist from being saved:</h2>
+
+      <ul>
+      <% oenologist.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :name %>
+    <%= form.text_field :name, :required => true %>
+  </div>
+
+  <div class="field">
+    <%= form.label :age %>
+    <%= form.text_field :age, :required => true %>
+  </div>
+
+  <div class="field">
+    <%= form.label :nationality %>
+    <%= form.text_field :nationality, :required => true %>
+  </div>
+  <% if @magazineList.present? %>
+      <div class="field"> 
+        <%= form.label Magazine %>
+        <%= select_tag 'magazine_id', options_for_select(@magazineList.collect{ |u| [u.name, u.id]})%>
+      </div>
+      <div class="field">
+        <%= form.label 'Cargo' %>
+        <% @cargos.each do |c| %>
+          <li>
+            <%= check_box_tag 'cargos[]', c -%>
+            <%= h c %>
+          </li>
+        <% end %>
+      </div>
+  <% else %>
+      <p>No existen revistas, ir a crear?</p>
+      <%= link_to 'New_magazine', magazines_path %>
+  <% end %>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>
